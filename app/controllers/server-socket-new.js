@@ -7,6 +7,7 @@ var players = require('./players'),
 
 var handleClient = function (socket) {
 
+    players.logPlayerCheck(socket.id, true);
     //console.log("connection with 2.1.1 socket.io : "+socket.id);
     socket.on('status', function (settings, status, priority) {
         var statusObject = _.extend(
@@ -36,20 +37,22 @@ var handleClient = function (socket) {
     });
 
     socket.on('snapshot', function (response) {
-        players.piScreenShot(socket.id,response);
+        players.piScreenShot(socket.id, response);
     });
 
-    socket.on('setplaylist_ack', function(response) {
+    socket.on('setplaylist_ack', function (response) {
         players.playlistChangeAck(socket.id, response);
     });
-    
+
     socket.on('upload', function (player, filename, data) {
         players.upload(player, filename, data);
     });
 
     socket.on('disconnect', function (reason) {
-        players.updateDisconnectEvent(socket.id,reason);
+        players.updateDisconnectEvent(socket.id, reason);
         //console.log("disconnect event: "+socket.id);
+        //here to implement the time logging
+        players.logPlayerCheck(socket.id, false);
     });
 };
 
@@ -61,7 +64,7 @@ exports.startSIO = function (io) {
 
 exports.emitMessage = function (sid) {
     if (iosockets.sockets[sid]) {
-        var args = Array.prototype.slice.call(arguments,1);
+        var args = Array.prototype.slice.call(arguments, 1);
         iosockets.sockets[sid].emit.apply(iosockets.sockets[sid], args);
     }
 }

@@ -10,7 +10,7 @@ var iosockets = null  //holds all the clients io.sockets
 var nextClientId = 1
 
 
-var handleClient = function(socket, request) {
+var handleClient = function (socket, request) {
     iosockets.sockets[nextClientId] = socket
     socket.id = nextClientId
     nextClientId++
@@ -19,7 +19,9 @@ var handleClient = function(socket, request) {
     if (iosockets.sockets[nextClientId])
         console.log("Error in generation of socket ID")
 
-    socket.on('ping', function() {
+    players.logPlayerCheck(socket.id, true);
+
+    socket.on('ping', function () {
         socket.isAlive = true
         socket.pong()
     })
@@ -28,7 +30,7 @@ var handleClient = function(socket, request) {
         try {
             messageArguments = JSON.parse(msg)     //
         } catch (e) {
-            console.error('Unable to parse message from client ws, '+msg)
+            console.error('Unable to parse message from client ws, ' + msg)
             return;
         }
         switch (messageArguments[0]) {
@@ -40,8 +42,8 @@ var handleClient = function(socket, request) {
                 var statusObject = _.extend(
                     {
                         lastReported: Date.now(),
-                        ip: request.headers['x-forwarded-for'] || (request.address && request.address.address) ,
-                            
+                        ip: request.headers['x-forwarded-for'] || (request.address && request.address.address),
+
                         socket: socket.id,
                         priority: priority,
                         serverName: request.headers.host.split(":")[0],
@@ -75,19 +77,23 @@ var handleClient = function(socket, request) {
                 break
         }
     })
-    socket.on('close',function (e) {
-        players.updateDisconnectEvent(socket.id,e.reason);
+    socket.on('close', function (e) {
+        players.updateDisconnectEvent(socket.id, e.reason);
         delete iosockets.sockets[socket.id]
+        //here to implement the time logging
+        players.logPlayerCheck(socket.id, false);
     })
 
-    socket.on('error',function (e){
+    socket.on('error', function (e) {
 
     })
 
     socket.on('disconnect', function (reason) {
         // socketExists[socket.id] = false;
-        players.updateDisconnectEvent(socket.id,reason);
+        players.updateDisconnectEvent(socket.id, reason);
         delete iosockets.sockets[socket.id]
+        //here to implement the time logging
+        players.logPlayerCheck(socket.id, false);
     });
 };
 
@@ -129,7 +135,7 @@ var handleClient = function(socket, request) {
 //    }
 //};
 
-exports.startSIO = function(wss) {
+exports.startSIO = function (wss) {
     wss.on('connection', handleClient)
     iosockets = {
         server: wss,
@@ -150,9 +156,9 @@ exports.startSIO = function(wss) {
     });
 }
 
-exports.emitMessage = function(sid) {
+exports.emitMessage = function (sid) {
     if (iosockets.sockets[sid]) {
-        var args = Array.prototype.slice.call(arguments,1);
+        var args = Array.prototype.slice.call(arguments, 1);
         iosockets.sockets[sid].send(JSON.stringify(args));
     }
 }

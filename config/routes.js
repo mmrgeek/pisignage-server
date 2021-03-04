@@ -10,6 +10,7 @@ var multer = require('multer'),
 var assets = require('../app/controllers/assets'),
     playlists = require('../app/controllers/playlists'),
     players = require('../app/controllers/players'),
+    logs = require('../app/controllers/log'),
     groups = require('../app/controllers/groups'),
     labels = require('../app/controllers/labels'),
     licenses  = require('../app/controllers/licenses');
@@ -59,6 +60,10 @@ router.get('/api/players/:playerid', players.getObject)
 router.post('/api/players', players.createObject)
 router.post('/api/players/:playerid', players.updateObject)
 router.delete('/api/players/:playerid', players.deleteObject)
+
+router.get('/api/logs',logs.index);
+router.get('/api/logs/players',logs.getBetweenInterval);
+router.get('/api/logs/players/frequency',logs.getPlayerFrequency)
 
 router.post('/api/pishell/:playerid', players.shell)
 router.post('/api/snapshot/:playerid',players.takeSnapshot)

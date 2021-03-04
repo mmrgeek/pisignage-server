@@ -106,6 +106,27 @@ exports.updateDisconnectEvent = function(socketId, reason) {
     })
 }
 
+exports.logPlayerCheck = function(socket,status){
+   
+    Player.findOne({socket: socket}, function (err,data) {
+        if(err){
+            console.log('Error while retriving player data: ' + err);
+        }
+        if(data){
+            const log = new Log();
+            log.player = {
+                _id: data._id,
+                name: data.name,
+                socket: socket
+            };
+            log.status = status ? 'UP': 'DOWN';
+            log.save();
+        }
+
+    })
+}
+
+
 var sendConfig = function (player, group, periodic) {
     var retObj = {};
 
