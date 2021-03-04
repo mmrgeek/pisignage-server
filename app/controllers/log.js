@@ -63,8 +63,22 @@ exports.getPlayerFrequency = function (req, res) {
 
             const intervalsStack = [];
             for (let index = 0; index < data.length; index++) {
-                
+                if (data[i].status == 'UP') {
+                    intervalsStack.push({
+                        from: data[i].date
+                    })
+                } else if (data[i].status == 'DOWN') {
+                    intervalsStack.peak().to = data[i].date
+                }
             }
+
+            let periods = 0;
+            intervalsStack.forEach(interval => {
+                periods += ((interval.to - interval.from) / 1000);
+            })
+
+            
+
             return rest.sendSuccess(res, 'Player logs retreived successfully', response);
         }
 
